@@ -17,7 +17,7 @@
     document.getElementById("tts-btn").addEventListener("click", async () => {
       const text = document.body.innerText; // Grab all visible text from page
 
-      const resp = await fetch("https://<your-username>-trading-tts.hf.space/api/tts", {
+      const resp = await fetch("https://huggingface.co/spaces/Ppraj916110-maker/trading-ek-tts", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ text })
