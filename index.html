@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTS Full Page Demo</title>
+</head>
+<body>
+  <h1>Trading Ek Mission - Full Page TTS Demo</h1>
+  <p>Welcome to Trading Ek Mission. This page demonstrates reading the entire page content aloud using our custom TTS engine.</p>
+  <p>You can use this button to generate audio for all visible text.</p>
+
+  <button id="tts-btn">🔊 Read Page</button>
+  <audio id="tts-player" controls></audio>
+
+  <script>
+    document.getElementById("tts-btn").addEventListener("click", async () => {
+      const text = document.body.innerText; // Grab all visible text from page
+
+      const resp = await fetch("https://<your-username>-trading-tts.hf.space/api/tts", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text })
+      });
+
+      if (!resp.ok) {
+        alert("TTS request failed!");
+        return;
+      }
+
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+
+      const audio = document.getElementById("tts-player");
+      audio.src = url;
+      audio.play();
+    });
+  </script>
+</body>
+</html>
