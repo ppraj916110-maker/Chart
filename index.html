@@ -3,37 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TTS Full Page Demo</title>
+  <title>Trading Ek Mission - TTS Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #tts-controls {
+      margin-top: 20px;
+    }
+    button {
+      margin-right: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+    #loading {
+      display: none;
+      color: green;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Trading Ek Mission - Full Page TTS Demo</h1>
-  <p>Welcome to Trading Ek Mission. This page demonstrates reading the entire page content aloud using our custom TTS engine.</p>
-  <p>You can use this button to generate audio for all visible text.</p>
+  <h1>Trading Ek Mission - Text-to-Speech Demo</h1>
+  <p>Welcome to Trading Ek Mission. This demo allows any user to listen to the full page content.</p>
+  <p>Click the buttons below to generate and control audio playback.</p>
 
-  <button id="tts-btn">🔊 Read Page</button>
-  <audio id="tts-player" controls></audio>
+  <div id="tts-controls">
+    <button id="tts-play">🔊 Play</button>
+    <button id="tts-pause">⏸ Pause</button>
+    <button id="tts-stop">⏹ Stop</button>
+    <div id="loading">Generating audio... please wait.</div>
+  </div>
+
+  <audio id="tts-player" controls style="display:block; margin-top:10px;"></audio>
 
   <script>
-    document.getElementById("tts-btn").addEventListener("click", async () => {
-      const text = document.body.innerText; // Grab all visible text from page
+    const playBtn = document.getElementById("tts-play");
+    const pauseBtn = document.getElementById("tts-pause");
+    const stopBtn = document.getElementById("tts-stop");
+    const loadingText = document.getElementById("loading");
+    const audioPlayer = document.getElementById("tts-player");
 
-      const resp = await fetch("https://huggingface.co/spaces/Ppraj916110-maker/trading-ek-tts", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ text })
-      });
+    let audioReady = false;
 
-      if (!resp.ok) {
-        alert("TTS request failed!");
-        return;
+    async function generateAudio() {
+      loadingText.style.display = "block";
+      const text = document.body.innerText;
+
+      try {
+        const response = await fetch("https://Ppraj916110-maker-trading-ek-tts.hf.space/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+          alert("TTS request failed. Try again later.");
+          loadingText.style.display = "none";
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        audioPlayer.src = url;
+        audioReady = true;
+        loadingText.style.display = "none";
+        audioPlayer.play();
+      } catch (err) {
+        console.error("TTS error:", err);
+        alert("Error connecting to TTS server.");
+        loadingText.style.display = "none";
       }
+    }
 
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
+    playBtn.addEventListener("click", () => {
+      if (!audioReady) {
+        generateAudio();
+      } else {
+        audioPlayer.play();
+      }
+    });
 
-      const audio = document.getElementById("tts-player");
-      audio.src = url;
-      audio.play();
+    pauseBtn.addEventListener("click", () => {
+      audioPlayer.pause();
+    });
+
+    stopBtn.addEventListener("click", () => {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
     });
   </script>
 </body>
